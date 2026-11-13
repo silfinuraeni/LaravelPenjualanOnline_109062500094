@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductCatalogController;
+use App\Http\Controllers\CartController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -18,6 +19,13 @@ Route::get('/shop', [AuthController::class, 'showShop'])->name('shop.index');
 
 Route::get('/', [ProductCatalogController::class, 'index'])->name('shop.index'); 
 Route::get('/produk/{product:slug}', [ProductCatalogController::class, 'show'])->name('shop.show'); 
+
+Route::middleware(['auth','role:customer'])->group(function () { 
+    Route::get('/keranjang', [CartController::class, 'index'])->name('cart.index'); 
+    Route::post('/keranjang/{product}', [CartController::class, 'store'])->name('cart.store'); 
+    Route::patch('/keranjang/{product}', [CartController::class, 'update'])->name('cart.update'); 
+    Route::delete('/keranjang/{product}', [CartController::class, 'destroy'])->name('cart.destroy'); 
+}); 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
