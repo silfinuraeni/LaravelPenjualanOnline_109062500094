@@ -10,7 +10,7 @@ class CheckoutRequest extends FormRequest
     { 
         return $this->user()?->role === 'customer'; 
     } 
- 
+
     public function rules(): array 
     { 
         return [ 

@@ -1,7 +1,7 @@
 <?php 
- 
+
 namespace App\Http\Controllers\Admin; 
- 
+
 use App\Http\Controllers\Controller; 
 use App\Models\Category; 
 use Illuminate\Http\RedirectResponse; 
@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str; 
 use Illuminate\Validation\Rule; 
 use Illuminate\View\View; 
- 
+
 class CategoryController extends Controller 
 { 
     public function index(): View 
@@ -18,15 +18,15 @@ class CategoryController extends Controller
             'categories' => Category::withCount('products')->orderBy('name')->get(), 
         ]); 
     } 
- 
+
     public function store(Request $request): RedirectResponse 
     { 
         $data = $request->validate(['name' => ['required', 'max:100', 'unique:categories,name']]); 
         Category::create(['name' => $data['name'], 'slug' => Str::slug($data['name'])]); 
- 
+
         return back()->with('success', 'Kategori ditambahkan.'); 
     } 
- 
+
     public function update(Request $request, Category $category): RedirectResponse 
     { 
         $data = $request->validate([ 

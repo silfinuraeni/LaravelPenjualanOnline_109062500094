@@ -1,7 +1,7 @@
 <?php 
- 
+
 namespace App\Http\Controllers; 
- 
+
 use App\Http\Requests\CheckoutRequest; 
 use App\Models\Order; 
 use App\Models\Product; 
@@ -13,21 +13,21 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str; 
 use Illuminate\Validation\ValidationException; 
 use Illuminate\View\View; 
- 
+
 class CheckoutController extends Controller 
 { 
     public function index(Request $request): View|RedirectResponse 
     { 
         $cart = $request->session()->get('cart', []); 
- 
+
         if ($cart === []) { 
             return redirect()->route('cart.index')->with('error', 'Keranjang masih kosong.'); 
         } 
- 
+
         $products = Product::whereIn('id', array_keys($cart))->get()->keyBy('id'); 
         $items = collect(); 
         $subtotal = 0; 
- 
+
         foreach ($cart as $productId => $quantity) { 
             $product = $products->get($productId); 
             if (! $product) { 
@@ -37,47 +37,50 @@ class CheckoutController extends Controller
             $subtotal += $lineTotal; 
             $items->push(compact('product', 'quantity', 'lineTotal')); 
         } 
- 
+
+        $checkoutToken = Str::random(32); 
+
         return view('checkout.index', [ 
             'items' => $items, 
             'subtotal' => $subtotal, 
             'shippingServices' => ShippingService::where('is_active', true)->orderBy('courier')->get(), 
+            'checkoutToken' => $checkoutToken, 
         ]); 
     } 
- 
+
     public function store(CheckoutRequest $request): RedirectResponse 
     { 
         $cart = $request->session()->get('cart', []); 
- 
+
         if ($cart === []) { 
             return redirect()->route('cart.index')->with('error', 'Keranjang masih kosong.'); 
         } 
- 
+
         $order = DB::transaction(function () use ($request, $cart) { 
             $shipping = ShippingService::whereKey($request->integer('shipping_service_id')) 
                 ->where('is_active', true) 
                 ->firstOrFail(); 
- 
+
             $lockedProducts = Product::whereIn('id', array_keys($cart)) 
                 ->lockForUpdate() 
                 ->get() 
                 ->keyBy('id'); 
- 
+
             $subtotal = 0; 
             foreach ($cart as $productId => $quantity) { 
                 $product = $lockedProducts->get($productId); 
- 
+
                 if (! $product || ! $product->is_active || $quantity > $product->stock) { 
                     throw ValidationException::withMessages([ 
                         'cart' => 'Stok berubah. Periksa kembali keranjang Anda.', 
                     ]); 
                 } 
- 
+
                 $subtotal += (float) $product->price * $quantity; 
             } 
- 
+
             $code = 'ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(6)); 
- 
+
             $order = Order::create([ 
                 'code' => $code, 
                 'user_id' => $request->user()->id, 
@@ -94,11 +97,11 @@ class CheckoutController extends Controller
                 'status' => 'pending', 
                 'ordered_at' => now(), 
             ]); 
- 
+
             foreach ($cart as $productId => $quantity) { 
                 $product = $lockedProducts->get($productId); 
                 $lineTotal = (float) $product->price * $quantity; 
- 
+
                 $order->items()->create([ 
                     'product_id' => $product->id, 
                     'product_name' => $product->name, 
@@ -106,9 +109,9 @@ class CheckoutController extends Controller
                     'quantity' => $quantity, 
                     'subtotal' => $lineTotal, 
                 ]); 
- 
+
                 $product->decrement('stock', $quantity); 
- 
+
                 StockMovement::create([ 
                     'product_id' => $product->id, 
                     'user_id' => $request->user()->id, 
@@ -119,12 +122,12 @@ class CheckoutController extends Controller
                     'movement_at' => now(), 
                 ]); 
             } 
- 
+
             return $order; 
         }); 
- 
+
         $request->session()->forget('cart'); 
- 
+
         return redirect()->route('orders.show', $order)->with('success', 'Checkout berhasil. Pesanan menunggu validasi admin.'); 
     } 
-} 
+}

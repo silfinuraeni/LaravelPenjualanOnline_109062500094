@@ -3,28 +3,66 @@
 @section('title', 'Daftar')
 
 @section('content')
-<div class="card" style="max-width:480px;margin:2rem auto;">
-    <h2 style="margin-bottom:1.5rem;text-align:center;">Registrasi Pelanggan</h2>
-    
+<div class="card auth-card">
+    <span class="eyebrow">MULAI DARI SINI</span>
+
+    <h1>Buat akun belanja</h1>
+
     <form method="POST" action="{{ route('register.store') }}">
         @csrf
-        <label>Nama
-            <input class="input" type="text" name="name" value="{{ old('name') }}" required autofocus>
+
+        <label>
+            Nama lengkap
+            <input
+                name="name"
+                value="{{ old('name') }}"
+                maxlength="120"
+                autocomplete="name"
+                required
+            >
         </label>
-        
-        <label style="margin-top:1rem;display:block;">Email
-            <input class="input" type="email" name="email" value="{{ old('email') }}" required>
+
+        <label>
+            Email
+            <input
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                autocomplete="username"
+                required
+            >
         </label>
-        
-        <label style="margin-top:1rem;display:block;">Password
-            <input class="input" type="password" name="password" required>
+
+        <label>
+            Password
+            <input
+                type="password"
+                name="password"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+            <span class="muted">Minimal 8 karakter.</span>
         </label>
-        
-        <label style="margin-top:1rem;display:block;">Konfirmasi Password
-            <input class="input" type="password" name="password_confirmation" required>
+
+        <label>
+            Ulangi password
+            <input
+                type="password"
+                name="password_confirmation"
+                autocomplete="new-password"
+                required
+            >
         </label>
-        
-        <button class="btn" style="width:100%;margin-top:1.5rem;">Daftar</button>
+
+        <button class="btn">Buat Akun</button>
     </form>
+
+    <p class="muted" style="margin-top: 20px">
+        Sudah punya akun?
+        <a href="{{ route('login') }}">
+            <strong>Masuk</strong>
+        </a>
+    </p>
 </div>
 @endsection

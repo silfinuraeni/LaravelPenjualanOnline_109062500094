@@ -1,75 +1,58 @@
-@@extends('layouts.admin') 
+@extends('layouts.admin')
 
-@section('title','Stok') 
+@section('content')
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>Stok & Barang Masuk</h2>
+    <a href="{{ route('admin.stock.create') }}" class="btn">+ Catat Barang Masuk</a>
+</div>
 
-@section('content')<div class="row" style="justify-content:space-between"> 
+@if(session('success'))
+    <div class="alert">
+        {{ session('success') }}
+    </div>
+@endif
 
-<h1>Histori Stok</h1> 
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Waktu</th>
+                <th>Produk</th>
+                <th>Tipe</th>
+                <th>Jumlah</th>
+                <th>Referensi / Catatan</th>
+                <th>Admin</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($movements as $movement)
+                <tr>
+                    <td>{{ $movement->movement_at }}</td>
+                    <td>{{ $movement->product->name ?? 'Produk Dihapus' }}</td>
+                    <td>
+                        @if($movement->type == 'IN')
+                            <span style="font-weight: bold; color: #065F46;">IN</span>
+                        @else
+                            <span style="font-weight: bold; color: #991B1B;">OUT</span>
+                        @endif
+                    </td>
+                    <td>{{ $movement->quantity }}</td>
+                    <td>
+                        <strong>{{ $movement->reference }}</strong><br>
+                        <small style="color: #6B7280;">{{ $movement->note }}</small>
+                    </td>
+                    <td>{{ $movement->user->name ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #6B7280; padding: 20px;">Belum ada riwayat pergerakan stok.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 
-<a class="btn" href="{{ route('admin.stock.create') }}">Barang Masuk</a> 
-
-</div> 
-
-<div class="card"> 
-
-<form class="row" method="GET"> 
-
-<label>Produk<select name="product_id"> 
-
-<option value="">Semua</option>@foreach($products as $product)<option value="{{ $product->id }}" 
-
-@selected(request('product_id')==$product->id)>{{ $product->name }}</option>@endforeach</select> 
-
-</label> 
-
-<label>Tipe<select name="type"> 
-
-<option value="">Semua</option> 
-
-<option value="IN">IN</option> 
-
-<option value="OUT">OUT</option> 
-
-</select> 
-
-</label> 
-
-<button class="btn">Filter</button> 
-
-</form> 
-
-</div> 
-
-<div class="card"> 
-
-<div class="table-scroll"><table> 
-
-<tr> 
-
-<th>Waktu</th> 
-
-<th>Produk</th> 
-
-<th>Tipe</th> 
-
-<th>Qty</th> 
-
-<th>Referensi</th> 
-
-<th>User</th> 
-
-</tr>@foreach($movements as $movement)<tr> 
-
-<td>{{ $movement->movement_at->format('d-m-Y H:i') }}</td> 
-
-<td>{{ $movement->product->name }}</td> 
-
-<td>{{ $movement->type }}</td> 
-
-<td>{{ $movement->quantity }}</td> 
-
-<td>{{ $movement->reference }}</td> 
-
-<td>{{ $movement->user?->name }}</td> 
-
-</tr>@endforeach</table></div>{{ $movements->links() }}</div>@endsection 
+    <div style="margin-top: 20px;">
+        {{ $movements->links() }}
+    </div>
+</div>
+@endsection
