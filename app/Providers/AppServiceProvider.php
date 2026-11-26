@@ -1,45 +1,30 @@
-<?php 
+<?php
 
+namespace App\Providers;
 
-namespace App\Providers; 
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
 
-use Illuminate\Pagination\Paginator; 
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
 
-use Illuminate\Support\ServiceProvider; 
-
-class AppServiceProvider extends ServiceProvider 
-
-{ 
-
-    /** 
-
-     * Register any application services. 
-
-     */ 
-
-    public function register(): void 
-
-    { 
-
-        // 
-
-    } 
-
- 
-
-    /** 
-
-     * Bootstrap any application services. 
-
-     */ 
-
-    public function boot(): void 
-
-    { 
-
-        Paginator::defaultView('pagination.default'); 
-
-    } 
-
-} 
+        Paginator::defaultView('pagination.default');
+    }
+}
