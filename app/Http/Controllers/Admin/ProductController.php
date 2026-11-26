@@ -1,7 +1,7 @@
 <?php 
- 
+
 namespace App\Http\Controllers\Admin; 
- 
+
 use App\Http\Controllers\Controller; 
 use App\Http\Requests\StoreProductRequest; 
 use App\Http\Requests\UpdateProductRequest; 
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; 
 use Illuminate\Support\Str; 
 use Illuminate\View\View; 
- 
+
 class ProductController extends Controller 
 { 
     public function index(Request $request): View 
